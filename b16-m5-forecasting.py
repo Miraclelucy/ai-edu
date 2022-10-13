@@ -4,15 +4,15 @@ import numpy as np
 plt.rcParams["figure.figsize"] = (20,5)
 
 # 包含第1天(d_1)到1913天(d_1913)的销量信息
-sales = pd.read_csv("./data/sales_train_validation.csv")
+sales = pd.read_csv("./data/b16/sales_train_validation.csv")
 print('--------历史天销售数据-------')
 print(sales[0:4])
 
-calendar = pd.read_csv("./data/calendar.csv")
+calendar = pd.read_csv("./data/b16/calendar.csv")
 print('--------日历数据-------')
 print(calendar[0:10])
 
-sell_prices = pd.read_csv("./data/sell_prices.csv")
+sell_prices = pd.read_csv("./data/b16/sell_prices.csv")
 print('--------历史周价格数据-------')
 print(sell_prices[0:10])
 
