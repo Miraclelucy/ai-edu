@@ -1,5 +1,5 @@
 
-跟学网站 https://github.com/microsoft/ai-edu/tree/master/%E5%AE%9E%E8%B7%B5%E6%A1%88%E4%BE%8B  
+跟学网站 https://github.com/microsoft/ai-edu/tree/master/实践案例  
 学习记录笔记
 
 以“做中学“的理念为核心，从人工智能真实的应用场景与案例出发，先讲生动的案例，配合详实的实际操作说明，然后在动手实现场景的基础，逐步引入人工智能学习中的相关理论知识
