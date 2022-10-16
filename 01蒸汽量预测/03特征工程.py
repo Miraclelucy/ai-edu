@@ -191,3 +191,83 @@ clf.fit(train_data, train_target)
 score = mean_squared_error(test_target, clf.predict(test_data))
 print("LinearRegression:   ", score)
 
+# 给予不同的数据量，查看模型的学习效果
+train_score = []
+test_score = []
+for i in range(10, len(train_data) + 1, 10): # start=10,stop=len(train_data) + 1,step=10
+    lin_reg = LinearRegression()
+    lin_reg.fit(train_data[:i], train_target[:i])
+    # LinearRegression().fit(X_train[:i], y_train[:i])
+
+    # 查看模型的预测情况：两种，模型基于训练数据集预测的情况(可以理解为模型拟合训练数据集的情况)，模型基于测试数据集预测的情况
+    # 此处使用 lin_reg.predict(X_train[:i])，为训练模型的全部数据集
+    y_train_predict = lin_reg.predict(train_data[:i])
+    train_score.append(mean_squared_error(train_target[:i], y_train_predict))
+
+    y_test_predict = lin_reg.predict(test_data)
+    test_score.append(mean_squared_error(test_target, y_test_predict))
+
+# np.sqrt(train_score)：将列表 train_score 中的数开平方
+plt.plot([i for i in range(1, len(train_score) + 1)], train_score, label='train')
+plt.plot([i for i in range(1, len(test_score) + 1)], test_score, label='test')
+
+# plt.legend()：显示图例（如图形的 label）；
+plt.legend()
+plt.show()
+
+# 把上面的模型的学习曲线率封装成一个函数
+def plot_learning_curve(algo, X_train, X_test, y_train, y_test):
+    """绘制学习曲线：只需要传入算法(或实例对象)、X_train、X_test、y_train、y_test"""
+    """当使用该函数时传入算法，该算法的变量要进行实例化，如：PolynomialRegression(degree=2)，变量 degree 要进行实例化"""
+    train_score = []
+    test_score = []
+    for i in range(10, len(X_train) + 1, 10):
+        algo.fit(X_train[:i], y_train[:i])
+
+        y_train_predict = algo.predict(X_train[:i])
+        train_score.append(mean_squared_error(y_train[:i], y_train_predict))
+
+        y_test_predict = algo.predict(X_test)
+        test_score.append(mean_squared_error(y_test, y_test_predict))
+
+    plt.plot([i for i in range(1, len(train_score) + 1)],
+             train_score, label="train")
+    plt.plot([i for i in range(1, len(test_score) + 1)],
+             test_score, label="test")
+
+    plt.legend()
+    plt.show()
+
+# K近邻回归
+for i in range(3,20):
+    clf = KNeighborsRegressor(n_neighbors=i) # 最近三个
+    clf.fit(train_data, train_target)
+    score = mean_squared_error(test_target, clf.predict(test_data))
+    print("KNeighborsRegressor:   ", score)
+
+# 决策树回归
+clf = DecisionTreeRegressor()
+clf.fit(train_data, train_target)
+score = mean_squared_error(test_target, clf.predict(test_data))
+print("DecisionTreeRegressor:   ", score)
+
+# 随机森林回归
+clf = RandomForestRegressor(n_estimators=200) # 200棵树模型
+clf.fit(train_data, train_target)
+score = mean_squared_error(test_target, clf.predict(test_data))
+print("RandomForestRegressor:   ", score)
+
+# Gradient Boosting
+from sklearn.ensemble import GradientBoostingRegressor
+
+myGBR = GradientBoostingRegressor(alpha=0.9, criterion='friedman_mse', init=None,
+                                  learning_rate=0.03, loss='huber', max_depth=14,
+                                  max_features='sqrt', max_leaf_nodes=None,
+                                  min_impurity_decrease=0.0,
+                                  min_samples_leaf=10, min_samples_split=40,
+                                  min_weight_fraction_leaf=0.0, n_estimators=300,
+                                  random_state=10, subsample=0.8, verbose=0,
+                                  warm_start=False)
+myGBR.fit(train_data, train_target)
+score = mean_squared_error(test_target, myGBR.predict(test_data))
+print("GradientBoostingRegressor:   ", score)
