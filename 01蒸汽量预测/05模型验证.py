@@ -212,5 +212,142 @@ TimeSeriesSplit(max_train_size=None, n_splits=3)
 for train, test in tscv.split(iris.data):
     print("时间序列分割：%s --- %s" % (train, test))
 
-# 网格搜索
+# 简单的网格搜索
+from sklearn.datasets import load_iris
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+
+iris = load_iris()
+X_train,X_test,y_train,y_test = train_test_split(iris.data,iris.target,random_state=0)
+print("Size of training set:{} size of testing set:{}".format(X_train.shape[0],X_test.shape[0]))
+
+####   grid search start
+best_score = 0
+for gamma in [0.001,0.01,0.1,1,10,100]:
+    for C in [0.001,0.01,0.1,1,10,100]:
+        svm = SVC(gamma=gamma,C=C)#对于每种参数可能的组合，进行一次训练；
+        svm.fit(X_train,y_train)
+        score = svm.score(X_test,y_test)
+        if score > best_score:#找到表现最好的参数
+            best_score = score
+            best_parameters = {'gamma':gamma,'C':C}
+####   grid search end
+
+print("Best score:{:.2f}".format(best_score))
+print("Best parameters:{}".format(best_parameters))
+
+# 第一次改进的网格搜索 上面直接用测试集调参数有信息泄露的风险，所以网格搜索是不用测试集，而是单独用一个验证集
+X_trainval,X_test,y_trainval,y_test = train_test_split(iris.data,iris.target,random_state=0)
+X_train,X_val,y_train,y_val = train_test_split(X_trainval,y_trainval,random_state=1)
+print("Size of training set:{} size of validation set:{} size of testing set:{}".format(X_train.shape[0],X_val.shape[0],X_test.shape[0]))
+
+best_score = 0.0
+for gamma in [0.001,0.01,0.1,1,10,100]:
+    for C in [0.001,0.01,0.1,1,10,100]:
+        svm = SVC(gamma=gamma,C=C)
+        svm.fit(X_train,y_train)
+        score = svm.score(X_val,y_val)
+        if score > best_score:
+            best_score = score
+            best_parameters = {'gamma':gamma,'C':C}
+svm = SVC(**best_parameters) #使用最佳参数，构建新的模型
+svm.fit(X_trainval,y_trainval) #使用训练集和验证集进行训练，more data always results in good performance.
+test_score = svm.score(X_test,y_test) # evaluation模型评估
+print("Best score on validation set:{:.2f}".format(best_score))
+print("Best parameters:{}".format(best_parameters))
+print("Best score on test set:{:.2f}".format(test_score))
+
+# 第二次改进的网格搜索 但验证中一次验证是不够的，用交叉验证来验证找到的参数的scores
+from sklearn.model_selection import cross_val_score
+best_score = 0.0
+for gamma in [0.001,0.01,0.1,1,10,100]:
+    for C in [0.001,0.01,0.1,1,10,100]:
+        svm = SVC(gamma=gamma,C=C)
+        scores = cross_val_score(svm,X_trainval,y_trainval,cv=5) #5折交叉验证
+        score = scores.mean() #取平均数
+        if score > best_score:
+            best_score = score
+            best_parameters = {"gamma":gamma,"C":C}
+svm = SVC(**best_parameters)
+svm.fit(X_trainval,y_trainval)
+test_score = svm.score(X_test,y_test)
+print("Best score on validation set:{:.2f}".format(best_score))
+print("Best parameters:{}".format(best_parameters))
+print("Score on testing set:{:.2f}".format(test_score))
+
+# sklearn中的网格搜索
+from sklearn.model_selection import GridSearchCV
+
+#把要调整的参数以及其候选值 列出来；
+param_grid = {"gamma":[0.001,0.01,0.1,1,10,100],
+             "C":[0.001,0.01,0.1,1,10,100]}
+print("Parameters:{}".format(param_grid))
+
+grid_search = GridSearchCV(SVC(),param_grid,cv=5) #实例化一个GridSearchCV类
+X_train,X_test,y_train,y_test = train_test_split(iris.data,iris.target,random_state=10)
+grid_search.fit(X_train,y_train) #训练，找到最优的参数，同时使用最优的参数实例化一个新的SVC estimator。
+print("Test set score:{:.2f}".format(grid_search.score(X_test,y_test)))
+print("Best parameters:{}".format(grid_search.best_params_))
+print("Best score on train set:{:.2f}".format(grid_search.best_score_))
+
+
+# 使用学习曲线判别偏差和方差问题
+# 通过画出不同训练集大小对应的训练集和验证集准确率，我们能够很轻松地检测模型是否方差偏高或偏差过高，以及增大训练集是否有用
+# 学习曲线
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.datasets import load_digits # 手写数字图片数据集
+from sklearn.model_selection import learning_curve
+from sklearn.model_selection import ShuffleSplit
+
+def plot_learning_curve(estimator, title, X, y, ylim=None, cv=None,
+                        n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    plt.xlabel("Training examples")
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(
+        estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    plt.grid()
+
+    plt.fill_between(train_sizes, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.1,
+                     color="r")
+    plt.fill_between(train_sizes, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.1, color="g")
+    plt.plot(train_sizes, train_scores_mean, 'o-', color="r",
+             label="Training score")
+    plt.plot(train_sizes, test_scores_mean, 'o-', color="g",
+             label="Cross-validation score")
+
+    plt.legend(loc="best")
+    return plt
+
+# 手写数字图片数据集
+digits = load_digits()
+X, y = digits.data, digits.target
+
+title = "Learning Curves (Naive Bayes)"  # 高斯朴素贝叶斯分类算法
+# Cross validation with 100 iterations to get smoother mean test and train
+# score curves, each time with 20% data randomly selected as a validation set.
+cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+estimator = GaussianNB() # 高斯朴素贝叶斯分类算法
+plot_learning_curve(estimator, title, X, y, ylim=(0.7, 1.01), cv=cv, n_jobs=4)
+plt.show()
+
+title = "Learning Curves (SVM, RBF kernel, $\gamma=0.001$)" # 支持向量机分类算法
+# SVC is more expensive so we do a lower number of CV iterations:
+cv = ShuffleSplit(n_splits=10, test_size=0.2, random_state=0)
+estimator = SVC(gamma=0.001) # 支持向量机分类算法
+plot_learning_curve(estimator, title, X, y, (0.7, 1.01), cv=cv, n_jobs=4)
+plt.show()
+
 
