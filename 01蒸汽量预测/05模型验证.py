@@ -118,6 +118,12 @@ clf = svm.SVC(kernel='linear', C=1)
 scores = cross_val_score(clf, iris.data, iris.target, cv=5)  #cv为迭代次数。
 print(scores)  # 打印输出每次迭代的度量值（准确度）
 print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))  # 获取置信区间。（也就是均值和方差）
+# 这里的cv可以自己定义一个。默认是kfold的方式来划分训练街和测试集
+# 可以自己改为shuffle的
+ss = ShuffleSplit(n_splits=5, test_size=0.3, random_state=0)
+scores = cross_val_score(clf, iris.data, iris.target, cv=ss)
+print(scores)  # 打印输出每次迭代的度量值（准确度）
+print("Accuracy: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))  # 获取置信区间。（也就是均值和方差）
 
 # ===================================多种度量结果======================================
 scoring = ['precision_macro', 'recall_macro'] # precision_macro为精度，recall_macro为召回率
@@ -207,5 +213,4 @@ for train, test in tscv.split(iris.data):
     print("时间序列分割：%s --- %s" % (train, test))
 
 # 网格搜索
-
 
