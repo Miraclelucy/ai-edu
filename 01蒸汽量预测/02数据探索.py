@@ -231,7 +231,7 @@ for var in cols_numeric_left:
 
     i += 1
     plt.subplot(frows, fcols, i)
-    trans_var, lambda_var = stats.boxcox(dat[var].dropna() + 1)
+    trans_var, lambda_var = stats.boxcox(dat[var].dropna() + 1) # boxcox是将数据分布正态化，使其更加符合后续对数据分布的假设
     trans_var = scale_minmax(trans_var)
     sns.distplot(trans_var, fit=stats.norm);
     plt.title(var + ' Tramsformed')
