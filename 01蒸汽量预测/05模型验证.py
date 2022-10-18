@@ -351,7 +351,7 @@ estimator = SVC(gamma=0.001) # 支持向量机分类算法
 plot_learning_curve(estimator, title, X, y, (0.7, 1.01), cv=cv, n_jobs=4)
 plt.show()
 
-# 验证曲线？？？
+# 验证曲线 验证曲线和学习曲线很相近，不同的是这里画出的是不同参数下模型的准确率而不是不同训练集大小下的准确率
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import load_digits
