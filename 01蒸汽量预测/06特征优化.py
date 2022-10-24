@@ -8,7 +8,7 @@ test_data = pd.read_csv(test_data_file, sep='\t', encoding='utf-8')
 
 epsilon=1e-5
 
-#组交叉特征，可以自行定义，如增加： x*x/y, log(x)/y 等等
+# 组交叉特征，可以自行定义，如增加： x*x/y, log(x)/y 等等
 func_dict = {
             'add': lambda x,y: x+y,
             'mins': lambda x,y: x-y,
@@ -33,7 +33,7 @@ train_data2, test_data2 = auto_features_make(train_data,test_data,func_dict,col_
 # PCA方法降维
 from sklearn.decomposition import PCA   #主成分分析法
 
-#PCA方法降维
+# PCA方法降维
 pca = PCA(n_components=500)
 train_data2_pca = pca.fit_transform(train_data2.iloc[:,0:-1])
 test_data2_pca = pca.transform(test_data2)
@@ -44,7 +44,7 @@ train_data2_pca['target'] = train_data2['target']
 X_train2 = train_data2[test_data2.columns].values
 y_train = train_data2['target']
 
-#使用lightgbm模型对新构造的特征进行模型训练和评估
+# 使用lightgbm模型对新构造的特征进行模型训练和评估
 # ls_validation i
 from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
