@@ -1,0 +1,3 @@
+由于本赛题数据集太大，请登录官方网站直接下载，速度更快。你可能需要注册和登陆阿里云账号。
+数据下载地址：https://tianchi.aliyun.com/competition/entrance/231576/information
+
