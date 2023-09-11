@@ -19,3 +19,5 @@
 接下来我们要从季节性+残差的成分中删除季节性成分后得到残差。
 ## 四 实操
 通过python的第三方类库statsmodes的seasonal_decompose来分解时间序列数据
+## 参考
+https://www.statsmodels.org/stable/generated/statsmodels.tsa.seasonal.seasonal_decompose.html?highlight=seasonal_decompose
